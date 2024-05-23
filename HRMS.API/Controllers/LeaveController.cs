@@ -108,7 +108,7 @@ namespace HRMS.API.Controllers
             return Ok(leaveRequests);
         }
 
-        public async Task<int> GetRemainingLeaveBalance(int employeeId, int leaveTypeId)
+        private async Task<int> GetRemainingLeaveBalance(int employeeId, int leaveTypeId)
         {
             var leaveBalance = await _context.LeaveBalances
                 .FirstOrDefaultAsync(lb => lb.EmployeeId == employeeId && lb.LeaveTypeId == leaveTypeId);
