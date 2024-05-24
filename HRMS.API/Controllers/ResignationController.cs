@@ -73,6 +73,11 @@ namespace HRMS.API.Controllers
             {
                 return NotFound("Department not found");
             }
+            var position = await _context.Positions.FirstOrDefaultAsync(d => d.Id == employee.PositionId);
+            if (position == null)
+            {
+                return NotFound("Position not found");
+            }
 
             // Create a new Resignation object from the DTO
             var resignation = new Resignation
