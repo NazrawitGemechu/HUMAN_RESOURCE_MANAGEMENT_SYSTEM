@@ -75,7 +75,7 @@ namespace HRMS.Tests
         }
 
         [Test]
-        public async Task GetResignationRequests_ReturnsOk_WithResignationRequests()
+        public async Task GetResignationRequests_ReturnsOk()
         {
             var _controller = new ResignationController(_context);
             // Act
@@ -88,7 +88,7 @@ namespace HRMS.Tests
         }
 
         [Test]
-        public async Task ApproveResignation_ReturnsOk_WhenResignationIsApprovedSuccessfully()
+        public async Task ApproveResignation_ReturnsOk_ApprovedSuccessfully()
         {
             var _controller = new ResignationController(_context);
             // Act
@@ -101,7 +101,7 @@ namespace HRMS.Tests
         }
 
         [Test]
-        public async Task RejectResignation_ReturnsOk_WhenResignationIsRejectedSuccessfully()
+        public async Task RejectResignation_ReturnsOk_WhenRejectedSuccessfully()
         {
             var _controller = new ResignationController(_context);
             // Act

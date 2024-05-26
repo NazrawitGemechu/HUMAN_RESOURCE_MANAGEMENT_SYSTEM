@@ -64,7 +64,7 @@ namespace HRMS.Tests
         }
 
         [Test]
-        public async Task GetEmployeeEvaluationDetail_ShouldReturnNotFound_WhenEmployeeNotFound()
+        public async Task GetEvaluationDetail_ReturnNotFound_WhenEmployeeNotFound()
         {
             // Arrange
             var employeeId = 1;
