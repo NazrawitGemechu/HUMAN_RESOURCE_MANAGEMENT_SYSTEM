@@ -67,9 +67,14 @@ namespace HRMS.API.Controllers
         public IActionResult DownloadEmployees(string empId = null, string name = null, string department = null, string position = null, string email = null, string branch = null)
         {
             IQueryable<Employee> query = _context.Employees
-    .Include(e => e.Department)
-    .Include(e => e.Position)
-    .Include(e => e.Branch);
+                .Include(e => e.Department)
+                .Include(e => e.Position)
+                .Include(e => e.Branch)
+                .Include(e => e.Grade)
+                .Include(e => e.Degree)
+                .Include(e => e.Experiences)
+                .Include(e => e.Educations)
+                .Include(e => e.ContactPersons);
 
             if (!string.IsNullOrEmpty(empId))
             {
@@ -105,10 +110,15 @@ namespace HRMS.API.Controllers
 
             // Create CSV content
             var csv = new StringBuilder();
-            csv.AppendLine("Emp_Id,Name,Department,Position,Email,Branch,HireDate,PhoneNo,Gender,Salary,Roles,Status");
+            csv.AppendLine("Emp_Id,FirstName,LastName,MotherName,Email,Gender,MaritalStatus,Region,Woreda,Kebele,HouseNo,PhoneNo,Department,Grade,Position,Branch,Degree,HireDate,Salary,Roles,Status,Experience_CompanyName,Experience_Position,Experience_StartDate,Experience_EndDate,Education_Degree,Education_Institute,ContactPerson_Name,ContactPerson_Relationship,ContactPerson_PhoneNo,ContactPerson_Region,ContactPerson_Woreda,ContactPerson_Kebele,ContactPerson_HouseNo");
+
             foreach (var employee in employees)
             {
-                csv.AppendLine($"{employee.Emp_Id},{employee.FirstName} {employee.LastName},{employee.Department.Name},{employee.Position.Name},{employee.Email},{employee.Branch.Name},{employee.HireDate},{employee.PhoneNo},{employee.Gender},{employee.Salary},{employee.Roles},{employee.Status}");
+                var experiences = employee.Experiences.Select(exp => $"{exp.CompanyName},{exp.Position},{exp.StartDate:yyyy-MM-dd},{exp.EndDate:yyyy-MM-dd}").DefaultIfEmpty(",,,").Aggregate((a, b) => $"{a}|{b}");
+                var educations = employee.Educations.Select(edu => $"{edu.Degree},{edu.Institute}").DefaultIfEmpty(",").Aggregate((a, b) => $"{a}|{b}");
+                var contactPersons = employee.ContactPersons.Select(cp => $"{cp.Name},{cp.Relationship},{cp.PhoneNo},{cp.Region},{cp.Woreda},{cp.Kebele},{cp.HouseNo}").DefaultIfEmpty(",,,,,").Aggregate((a, b) => $"{a}|{b}");
+
+                csv.AppendLine($"{employee.Emp_Id},{employee.FirstName},{employee.LastName},{employee.MotherName},{employee.Email},{employee.Gender},{employee.MaritalStatus},{employee.Region},{employee.Woreda},{employee.Kebele},{employee.HouseNo},{employee.PhoneNo},{employee.Department?.Name},{employee.Grade?.GradeName},{employee.Position?.Name},{employee.Branch?.Name},{employee.Degree?.Name},{employee.HireDate:yyyy-MM-dd},{employee.Salary},{employee.Roles},{employee.Status},{experiences},{educations},{contactPersons}");
             }
 
             var memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(csv.ToString()));
