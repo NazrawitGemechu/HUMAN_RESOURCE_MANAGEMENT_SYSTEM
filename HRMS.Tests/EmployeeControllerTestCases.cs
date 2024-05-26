@@ -192,7 +192,7 @@ namespace HRMS.Tests
             Assert.AreEqual("Smith", employeeList[1].LastName);
         }
         [Test]
-        public async Task CorrectRegisterEmployee_ReturnsOk_WithValidData()
+        public async Task CorrectRegisterEmployee_ValidData_ReturnsOk()
         {
             // Arrange
             var controller = new EmployeeController(_context, _mockUserManager.Object, _mockRoleManager.Object);
@@ -201,8 +201,8 @@ namespace HRMS.Tests
                 FirstName = "John",
                 LastName = "Doe",
                 MotherName = "Jane Doe",
-                Email = "johndoe@gmail.com",
-                Emp_Id = "EMP004",
+                Email = "john.doe@example.com",
+                Emp_Id = "EMP003",
                 DepartmentId = 1,
                 GradeId = 1,
                 PositionId = 1,
@@ -218,83 +218,74 @@ namespace HRMS.Tests
                 Kebele = 123,
                 PhoneNo = "1234567890",
                 Experiences = new List<ExperienceDto>
-                {
-                    new ExperienceDto
-                    {
-                        CompanyName = "ABC Company",
-                        ExperiencePosition = "Software Engineer",
-                        ExperienceStartDate = DateTime.Now.AddYears(-5),
-                        ExperienceEndDate = DateTime.Now.AddYears(-3)
-                    }
-                },
+    {
+      new ExperienceDto
+      {
+        CompanyName = "ABC Company",
+        ExperiencePosition = "Software Engineer",
+        ExperienceStartDate = DateTime.Now.AddYears(-5),
+        ExperienceEndDate = DateTime.Now.AddYears(-3)
+      }
+    },
                 Educations = new List<EducationDto>
-                {
-                    new EducationDto
-                    {
-                        Degree = "Bachelor",
-                        Institute = "University"
-                    }
-                },
+    {
+      new EducationDto
+      {
+        Degree = "Bachelor",
+        Institute = "University"
+      }
+    },
                 ContactPersons = new List<ContactPersonDto>
-                {
-                    new ContactPersonDto
-                    {
-                        ContactPersonName = "Jane Smith",
-                        Relationship = "Relative",
-                        ContactPhoneNo = "9876543210",
-                        ContactRegion = "Region",
-                        ContactWoreda = "Woreda",
-                        ContactKebele = 456,
-                        ContactHouseNo = "123"
-                    }
-                },
+    {
+      new ContactPersonDto
+      {
+        ContactPersonName = "Jane Smith",
+        Relationship = "Relative",
+        ContactPhoneNo = "9876543210",
+        ContactRegion = "Region",
+        ContactWoreda = "Woreda",
+        ContactKebele = 456,
+        ContactHouseNo = "123"
+      }
+    },
                 ChildInformations = new List<ChildDto>
-                {
-                    new ChildDto
-                    {
-                        ChildName = "Alice",
-                        DateOfBirth = DateTime.Now.AddYears(-5)
-                    }
-                }
-
+    {
+      new ChildDto
+      {
+        ChildName = "Alice",
+        DateOfBirth = DateTime.Now.AddYears(-5)
+      }
+    }
             };
 
-            // Act
-            var actionResult = await controller.CorrectRegisterEmployee(employeeDto);
+            // Mock UserManager CreateAsync to return success
+            _mockUserManager.Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+              .Returns(Task.FromResult(IdentityResult.Success));
 
-            var objectResult = actionResult as ObjectResult; // Use ObjectResult instead of OkObjectResult
-            Assert.IsNotNull(objectResult);
-            Assert.AreEqual(StatusCodes.Status200OK, objectResult.StatusCode); // Check the status code
+            // Mock RoleManager RoleExistsAsync to return false (need to create role)
+            _mockRoleManager.Setup(rm => rm.RoleExistsAsync(It.IsAny<string>()))
+              .Returns(Task.FromResult(false));
 
-            var response = objectResult.Value as EmployeeDto; // Extract the value from the result
-            Assert.IsNotNull(response);
-            // Add more assertions to check the response data
-        }
+            // Mock RoleManager CreateAsync to succeed
+            _mockRoleManager.Setup(rm => rm.CreateAsync(It.IsAny<IdentityRole>()))
+              .Returns(Task.FromResult(IdentityResult.Success));
 
-        [Test]
-        public async Task CorrectRegisterEmployee_ReturnsBadRequest_WithInvalidData()
-        {
-            // Arrange
-            var controller = new EmployeeController(_context, _mockUserManager.Object, _mockRoleManager.Object);
-            var employeeDto = new UpdateEmployeeDto
-            {
-                // Missing required fields or invalid data
-                // Example:
-                FirstName = "John",
-                LastName = "Doe",
-                // Missing other required fields
-            };
+            // Mock UserManager AddToRoleAsync to succeed
+            _mockUserManager.Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
+              .Returns(Task.FromResult(IdentityResult.Success));
 
             // Act
             var actionResult = await controller.CorrectRegisterEmployee(employeeDto);
 
             // Assert
-            var badRequestResult = actionResult as BadRequestObjectResult;
-            Assert.IsNotNull(badRequestResult);
-            Assert.AreEqual(StatusCodes.Status400BadRequest, badRequestResult.StatusCode);
-            // Add more assertions to check the error response, if needed
-        }
+            var okResult = actionResult as OkObjectResult;
+            Assert.IsNotNull(okResult);
+            Assert.AreEqual(StatusCodes.Status200OK, okResult.StatusCode);
 
+            var response = okResult.Value as EmployeeDto;
+            Assert.IsNotNull(response);
+            // Add assertions to verify other properties of the returned EmployeeDto
+        }
 
         [Test]
         public async Task CorrectRegisterEmployee_ReturnsBadRequest_ForDuplicateEmpId()

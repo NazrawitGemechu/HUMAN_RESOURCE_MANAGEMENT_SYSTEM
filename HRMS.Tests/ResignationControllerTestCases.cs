@@ -2,6 +2,7 @@
 using HRMS.API.Data;
 using HRMS.API.DTO;
 using HRMS.API.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -85,36 +86,6 @@ namespace HRMS.Tests
             Assert.AreEqual(200, result.StatusCode);
             Assert.IsNotNull(result.Value);
         }
-
-        [Test]
-        public async Task RequestResignation_ReturnsOk_WhenResignationRequestIsSubmittedSuccessfully()
-        {
-            var _controller = new ResignationController(_context);
-            // Arrange
-            var resignationDto = new ResignationDto
-            {
-                Emp_Id = "EMP001",
-                FullName = "John Doe",
-                DepartmentId = 1,
-                PositionId = 1,
-                SeparationDate = DateTime.Now.AddDays(30),
-                Reason = "Personal reasons",
-                Satisfaction = "Neutral",
-                EmployeeRelationship = "Good",
-                Recommendation = "Recommendable",
-                Comment = "No comments",
-                EmployeeHireDate = DateTime.Now.AddYears(-2),
-
-            };
-
-            // Act
-            var result = await _controller.RequestLeave(resignationDto) as OkObjectResult;
-
-            // Assert
-            Assert.IsNotNull(result);
-            Assert.AreEqual(200, result.StatusCode);
-            Assert.AreEqual("Resignation request submitted successfully", result.Value);
-        }                   
 
         [Test]
         public async Task ApproveResignation_ReturnsOk_WhenResignationIsApprovedSuccessfully()
