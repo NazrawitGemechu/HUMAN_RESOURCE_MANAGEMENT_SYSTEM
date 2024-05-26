@@ -169,41 +169,61 @@ namespace HRMS.API.Controllers
         [HttpPut("update")]
         public async Task<IActionResult> UpdateUserProfile(UserProfileUpdateDto model, [FromQuery] string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
+            try
             {
-                return NotFound("User not found");
-            }
-
-            // Update photo only if provided
-            if (model.PhotoData != null)
-            {
-                var fileName = Path.GetFileName(model.PhotoData.FileName);
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", fileName);
-
-                // Delete existing photo if present (optional, modify if needed)
-                var existingPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "Images", user.pictureURL.Split('/').Last());
-                if (System.IO.File.Exists(existingPhotoPath))
+                if (string.IsNullOrEmpty(userId))
                 {
-                    System.IO.File.Delete(existingPhotoPath);
+                    return BadRequest("User ID cannot be null or empty");
                 }
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
                 {
-                    await model.PhotoData.CopyToAsync(stream);
+                    return NotFound("User not found");
                 }
 
-                user.pictureURL = "/images/" + fileName;
-            }
+                // Update photo only if provided
+                if (model.PhotoData != null)
+                {
+                    var fileName = Path.GetFileName(model.PhotoData.FileName);
+                    if (string.IsNullOrEmpty(fileName))
+                    {
+                        return BadRequest("Invalid file name");
+                    }
 
-            var result = await _userManager.UpdateAsync(user);
-            if (result.Succeeded)
-            {
-                return Ok("Profile photo updated successfully");
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", fileName);
+
+                    // Delete existing photo if present
+                    if (!string.IsNullOrEmpty(user.pictureURL))
+                    {
+                        var existingPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "Images", user.pictureURL.Split('/').Last());
+                        if (System.IO.File.Exists(existingPhotoPath))
+                        {
+                            System.IO.File.Delete(existingPhotoPath);
+                        }
+                    }
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.PhotoData.CopyToAsync(stream);
+                    }
+
+                    user.pictureURL = "/images/" + fileName;
+                }
+
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    return Ok("Profile photo updated successfully");
+                }
+                else
+                {
+                    return BadRequest("Failed to update profile photo");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                return BadRequest("Failed to update profile photo");
+                return StatusCode(500, "Internal server error");
             }
         }
 

@@ -51,8 +51,8 @@ namespace HRMS.API.Controllers
             return Ok(userDtoList);
         }
         [HttpPost]
-        [Route("LockOrUnlockUser/{userId}")]
-        public IActionResult LockUnlock(string userId)
+        [Route("LockOrUnlockUser")]
+        public IActionResult LockUnlock([FromQuery] string userId)
         {
             var objFromDb = _context.ApplicationUsers.FirstOrDefault(u => u.Id == userId);
             if (objFromDb == null)

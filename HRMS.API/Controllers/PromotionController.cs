@@ -184,7 +184,7 @@ namespace HRMS.API.Controllers
         }
 
         [HttpPost]
-        [Route("RejectCandidate")]
+        [Route("RejectCandidate/{employeeId}")]
         public async Task<IActionResult> RejectCandidate(int employeeId)
         {
             var application = await _context.EmployeeJobApplications

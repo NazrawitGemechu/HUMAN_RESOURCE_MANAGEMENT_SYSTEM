@@ -47,5 +47,7 @@ namespace HRMS.API.Models
         public virtual Grade PreviousGrade { get; set; }
         public virtual EmployeePhoto EmployeePhoto { get; set; }
         public List<Notification> Notifications { get; set; } = new List<Notification>();
+        public ICollection<EmployeeEvaluation> EmployeeEvaluations { get; set; }
+        public ICollection<EmployeeFeedback> EmployeeFeedbacks { get; set; }
     }
 }

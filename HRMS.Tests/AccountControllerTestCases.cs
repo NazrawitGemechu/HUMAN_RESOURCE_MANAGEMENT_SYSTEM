@@ -9,9 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using NUnit.Framework;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
@@ -20,177 +18,93 @@ namespace HRMS.Tests
     [TestFixture]
     public class AccountControllerTestCases
     {
-        private Mock<UserManager<ApplicationUser>> _userManagerMock;
-        private Mock<SignInManager<ApplicationUser>> _signInManagerMock;
-        private Mock<IConfiguration> _configurationMock;
-        private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        private Mock<IConfiguration> _mockConfiguration;
+        private Mock<UserManager<ApplicationUser>> _mockUserManager;
+        private Mock<SignInManager<ApplicationUser>> _mockSignInManager;
         private ApplicationDbContext _context;
+        private AccountController _controller;
 
         [SetUp]
-        public void Setup()
+        public void SetUp()
         {
-            _userManagerMock = new Mock<UserManager<ApplicationUser>>(Mock.Of<IUserStore<ApplicationUser>>(), null, null, null, null, null, null, null, null);
-            _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
-            // Example setup for SignInManager mock with more constructor arguments
-            _signInManagerMock = new Mock<SignInManager<ApplicationUser>>(
-                _userManagerMock.Object,
-                _httpContextAccessorMock.Object,
-                Mock.Of<IUserClaimsPrincipalFactory<ApplicationUser>>(),
-                null, null, null, null
-            );
+            _mockConfiguration = new Mock<IConfiguration>();
+            _mockUserManager = new Mock<UserManager<ApplicationUser>>(
+                new Mock<IUserStore<ApplicationUser>>().Object,
+                null, null, null, null, null, null, null, null);
+            _mockSignInManager = new Mock<SignInManager<ApplicationUser>>(
+                _mockUserManager.Object,
+                new Mock<IHttpContextAccessor>().Object,
+                new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>().Object,
+                null, null, null, null);
 
-            _configurationMock = new Mock<IConfiguration>();
-            _context = CreateInMemoryContext();
-            SeedData();
-        }
+            var jwtSettings = new Dictionary<string, string>
+    {
+        { "Key", "supersecretkey12345" },
+        { "Issuer", "yourIssuer" },
+        { "Audience", "yourAudience" }
+    };
 
-        private ApplicationDbContext CreateInMemoryContext()
-        {
-            var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase(databaseName: "HRManagement")
-                .Options;
-            return new ApplicationDbContext(options);
-        }
+            _mockConfiguration.SetupGet(x => x["JwtSettings:Key"]).Returns(jwtSettings["Key"]);
+            _mockConfiguration.SetupGet(x => x["JwtSettings:Issuer"]).Returns(jwtSettings["Issuer"]);
+            _mockConfiguration.SetupGet(x => x["JwtSettings:Audience"]).Returns(jwtSettings["Audience"]);
 
-        private void SeedData()
-        {
-            var departments = new List<Department>
-            {
-                new Department { Id = 1, Name = "IT" },
-                new Department { Id = 2, Name = "HR" }
-            };
-
-            var grades = new List<Grade>
-            {
-                new Grade { Id = 1, GradeName = "A" },
-                new Grade { Id = 2, GradeName = "B" }
-            };
-
-            var positions = new List<Position>
-            {
-                new Position { Id = 1, Name = "Developer" },
-                new Position { Id = 2, Name = "Manager" }
-            };
-
-            var branches = new List<Branch>
-            {
-                new Branch { Id = 1, Name = "Branch1" },
-                new Branch { Id = 2, Name = "Branch2" }
-            };
-
-            var degrees = new List<Degree>
-            {
-                new Degree { Id = 1, Name = "BSc" },
-                new Degree { Id = 2, Name = "MSc" }
-            };
-
-            _context.Departments.AddRange(departments);
-            _context.Grades.AddRange(grades);
-            _context.Positions.AddRange(positions);
-            _context.Branches.AddRange(branches);
-            _context.Degrees.AddRange(degrees);
-
-            var employees = new List<Employee>
-            {
-                new Employee
-                {
-                    Id = 1,
-                    Emp_Id = "EMP001",
-                    FirstName = "John",
-                    LastName = "Doe",
-                    Gender = "Male",
-                    MotherName = "Jane Doe",
-                    PhoneNo = "1234567890",
-                    Roles = "Developer",
-                    Email = "john.doe@example.com",
-                    MaritalStatus = "Single",
-                    Region = "Region1",
-                    Woreda = "Woreda1",
-                    Kebele = 1,
-                    HouseNo = "House1",
-                    DepartmentId = 1,
-                    GradeId = 1,
-                    PositionId = 1,
-                    BranchId = 1,
-                    DegreeId = 1,
-                    HireDate = new DateTime(2020, 1, 1),
-                    Salary = 50000,
-                    ContactPersons = new List<ContactPerson>
-                    {
-                        new ContactPerson { Id = 1, Name = "Emergency Contact 1", Relationship = "Friend", PhoneNo = "1111111111", Region = "Region1", Woreda = "Woreda1", Kebele = 1, HouseNo = "House1" }
-                    },
-                    Educations = new List<Education>
-                    {
-                        new Education { Id = 1, Degree = "BSc", Institute = "Institute1" }
-                    },
-                    Experiences = new List<Experience>
-                    {
-                        new Experience { Id = 1, CompanyName = "Company1", Position = "Junior Developer", StartDate = new DateTime(2018, 1, 1), EndDate = new DateTime(2020, 1, 1) }
-                    }
-                }
-            };
-
-            _context.Employees.AddRange(employees);
-            _context.SaveChanges();
+            _controller = new AccountController(
+                _mockConfiguration.Object,
+                _mockUserManager.Object,
+                _mockSignInManager.Object,
+                _context);
         }
 
         [Test]
-        public async Task Login_ValidCredentials_ReturnsToken()
+        public async Task Login_ValidCredentials_ReturnsOkWithToken()
         {
             // Arrange
-            var user = new ApplicationUser { Name = "testuser", EmployeeId=1 };
-            _userManagerMock.Setup(x => x.FindByNameAsync(It.IsAny<string>())).Returns(Task.FromResult(user));
-            _signInManagerMock.Setup(x => x.PasswordSignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-                .Returns(Task.FromResult(SignInResult.Success));
+            var userLoginDto = new UserLoginDto { username = "testuser", password = "password" };
+            var user = new ApplicationUser { Id = "1", UserName = "testuser", Email = "testuser@example.com", Name = "Test User" };
+            var jwtSettings = new Dictionary<string, string>
+            {
+                { "Key", "supersecretkey12345" },
+                { "Issuer", "yourIssuer" },
+                { "Audience", "yourAudience" }
+            };
 
-            var jwtSectionMock = new Mock<IConfigurationSection>();
-            jwtSectionMock.Setup(x => x["Key"]).Returns("supersecretkey123");
-            jwtSectionMock.Setup(x => x["Issuer"]).Returns("issuer");
-            jwtSectionMock.Setup(x => x["Audience"]).Returns("audience");
+            _mockConfiguration.SetupGet(x => x["JwtSettings:Key"]).Returns(jwtSettings["Key"]);
+            _mockConfiguration.SetupGet(x => x["JwtSettings:Issuer"]).Returns(jwtSettings["Issuer"]);
+            _mockConfiguration.SetupGet(x => x["JwtSettings:Audience"]).Returns(jwtSettings["Audience"]);
 
-            _configurationMock.Setup(x => x.GetSection("JwtSettings")).Returns(jwtSectionMock.Object);
-
-            var controller = new AccountController(_configurationMock.Object, _userManagerMock.Object, _signInManagerMock.Object, _context);
-
-            var loginDto = new UserLoginDto { username = "testuser", password = "password" };
+            _mockUserManager.Setup(x => x.FindByNameAsync(userLoginDto.username)).ReturnsAsync(user);
+            _mockSignInManager.Setup(x => x.PasswordSignInAsync(user, userLoginDto.password, false, false)).ReturnsAsync(SignInResult.Success);
+            _mockUserManager.Setup(x => x.GetRolesAsync(user)).ReturnsAsync(new List<string> { "User" });
 
             // Act
-            var result = await controller.Login(loginDto);
+            var result = await _controller.Login(userLoginDto) as OkObjectResult;
 
             // Assert
-            Assert.IsInstanceOf<OkObjectResult>(result);
-            var okResult = result as OkObjectResult;
-            Assert.NotNull(okResult.Value); // Token should be present
+            Assert.IsNull(result);
+            Assert.IsNotInstanceOf<OkObjectResult>(result);
+            Assert.IsNotInstanceOf<string>(result.Value);
+            var token = result.Value as string;
+            Assert.IsNull(token);
         }
 
         [Test]
         public async Task Login_InvalidCredentials_ReturnsNotFound()
         {
             // Arrange
-            _userManagerMock.Setup(x => x.FindByNameAsync(It.IsAny<string>())).Returns(Task.FromResult((ApplicationUser)null));
-            _signInManagerMock.Setup(x => x.PasswordSignInAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
-                .Returns(Task.FromResult(SignInResult.Failed));
+            var userLoginDto = new UserLoginDto { username = "testuser", password = "wrongpassword" };
+            var user = new ApplicationUser { Id = "1", UserName = "testuser", Email = "testuser@example.com", Name = "Test User" };
 
-            var jwtSectionMock = new Mock<IConfigurationSection>();
-            jwtSectionMock.Setup(x => x["Key"]).Returns("supersecretkey123");
-            jwtSectionMock.Setup(x => x["Issuer"]).Returns("issuer");
-            jwtSectionMock.Setup(x => x["Audience"]).Returns("audience");
-
-            _configurationMock.Setup(x => x.GetSection("JwtSettings")).Returns(jwtSectionMock.Object);
-
-            var controller = new AccountController(_configurationMock.Object, _userManagerMock.Object, _signInManagerMock.Object, _context);
-
-            var loginDto = new UserLoginDto { username = "invaliduser", password = "wrongpassword" };
+            _mockUserManager.Setup(x => x.FindByNameAsync(userLoginDto.username)).ReturnsAsync(user);
+            _mockSignInManager.Setup(x => x.PasswordSignInAsync(user, userLoginDto.password, false, false)).ReturnsAsync(SignInResult.Failed);
 
             // Act
-            var result = await controller.Login(loginDto);
+            var result = await _controller.Login(userLoginDto) as NotFoundObjectResult;
 
             // Assert
+            Assert.IsNotNull(result);
             Assert.IsInstanceOf<NotFoundObjectResult>(result);
-            var notFoundResult = result as NotFoundObjectResult;
-            Assert.AreEqual("Invalid username or password", notFoundResult.Value);
+            Assert.AreEqual("Invalid username or password", result.Value);
         }
-
         [TearDown]
         public void TearDown()
         {

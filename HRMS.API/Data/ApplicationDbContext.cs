@@ -30,6 +30,9 @@ namespace HRMS.API.Data
         public virtual DbSet<Compliant> Compliants { get; set; }
         public virtual DbSet<EmployeePhoto> EmployeePhotos { get; set; }
         public virtual DbSet<Notification> Notifications { get; set; }
+        public virtual DbSet<EvaluationFactor> EvaluationFactors { get; set; }
+        public virtual DbSet<EmployeeEvaluation> EmployeeEvaluations { get; set; }
+        public virtual DbSet<EmployeeFeedback> EmployeeFeedbacks { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -80,6 +83,21 @@ namespace HRMS.API.Data
                 .WithMany(p => p.Resignations)
                 .HasForeignKey(d => d.DepartmentId)
                 .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<Employee>()
+            .HasMany(e => e.EmployeeEvaluations)
+            .WithOne(ee => ee.Employee)
+            .HasForeignKey(ee => ee.EmployeeId);
+
+            modelBuilder.Entity<Employee>()
+                .HasMany(e => e.EmployeeFeedbacks)
+                .WithOne(ef => ef.Employee)
+                .HasForeignKey(ef => ef.EmployeeId);
+
+            modelBuilder.Entity<EmployeeEvaluation>()
+                .HasOne(ee => ee.EvaluationFactor)
+                .WithMany()
+                .HasForeignKey(ee => ee.EvaluationFactorId);
+
 
 
         }
