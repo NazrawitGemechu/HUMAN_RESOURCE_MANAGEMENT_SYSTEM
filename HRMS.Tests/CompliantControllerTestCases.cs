@@ -23,30 +23,25 @@ namespace HRMS.Tests
         [SetUp]
         public void Setup()
         {
-            // Mocking DbContext
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                 .Options;
             _context = new ApplicationDbContext(options);
-
-            // Mocking UserManager
             var mockUserStore = new Mock<IUserStore<ApplicationUser>>();
             _userManager = new UserManager<ApplicationUser>(mockUserStore.Object, null, null, null, null, null, null, null, null);
 
-            // Seed data
-            // Seed data
             _context.Employees.Add(new Employee
             {
                 Emp_Id = "1",
-                FirstName = "John",
-                LastName = "Doe",
-                Gender = "Male",
-                Email = "john.doe@example.com",
-                PhoneNo = "1234567890",
-                MotherName = "Jane Doe",
+                FirstName = "Nazrawit",
+                LastName = "Gemechu",
+                Gender = "Female",
+                Email = "nazrawitgemechu@gmail.com",
+                PhoneNo = "0922538433",
+                MotherName = "Saron",
                 MaritalStatus = "Single",
-                Region = "Region1",
-                Woreda = "Woreda1",
+                Region = "Test Region",
+                Woreda = "Test Woreda",
                 Roles = "Employee"
             });
 
@@ -71,7 +66,6 @@ namespace HRMS.Tests
         [Test]
         public async Task PostCompliant_ValidComplaint_ReturnsOk()
         {
-            // Arrange
             var controller = new ComplaintController(_context, _userManager);
             var complaintDto = new ComplaintDto
             {
@@ -84,10 +78,8 @@ namespace HRMS.Tests
                 DateOfEvent = DateTime.Now
             };
 
-            // Act
             var result = await controller.PostCompliant(complaintDto) as OkObjectResult;
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
             Assert.AreEqual("Compliant submitted successfully", result.Value);
@@ -96,13 +88,10 @@ namespace HRMS.Tests
         [Test]
         public async Task AddressCompliant_ValidComplaint_ReturnsOk()
         {
-            // Arrange
             var controller = new ComplaintController(_context, _userManager);
 
-            // Act
             var result = await controller.AddressCompliant(1) as OkResult;
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
 
@@ -113,13 +102,9 @@ namespace HRMS.Tests
         [Test]
         public async Task AddressCompliant_InvalidComplaint_ReturnsNotFound()
         {
-            // Arrange
             var controller = new ComplaintController(_context, _userManager);
 
-            // Act
             var result = await controller.AddressCompliant(999) as NotFoundObjectResult;
-
-            // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(404, result.StatusCode);
             Assert.AreEqual("Complaint not found", result.Value);

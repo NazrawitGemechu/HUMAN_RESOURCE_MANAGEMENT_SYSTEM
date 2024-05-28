@@ -108,7 +108,6 @@ namespace HRMS.API.Controllers
 
             var employees = query.ToList();
 
-            // Create CSV content
             var csv = new StringBuilder();
             csv.AppendLine("Emp_Id,FirstName,LastName,MotherName,Email,Gender,MaritalStatus,Region,Woreda,Kebele,HouseNo,PhoneNo,Department,Grade,Position,Branch,Degree,HireDate,Salary,Roles,Status,Experience_CompanyName,Experience_Position,Experience_StartDate,Experience_EndDate,Education_Degree,Education_Institute,ContactPerson_Name,ContactPerson_Relationship,ContactPerson_PhoneNo,ContactPerson_Region,ContactPerson_Woreda,ContactPerson_Kebele,ContactPerson_HouseNo");
 
@@ -234,8 +233,6 @@ namespace HRMS.API.Controllers
             {
                 return NotFound();
             }
-
-            // Update employee properties
             employee.FirstName = employeeDto.FirstName;
             employee.LastName = employeeDto.LastName;
             employee.MotherName = employeeDto.MotherName;
@@ -259,13 +256,10 @@ namespace HRMS.API.Controllers
 
             _context.Entry(employee).State = EntityState.Modified;
 
-            // Update related entities (Educations)
             if (employeeDto.Educations != null)
             {
-                // Remove existing educations
                 _context.Educations.RemoveRange(employee.Educations);
 
-                // Add new educations
                 foreach (var educationDto in employeeDto.Educations)
                 {
                     var education = new Education
@@ -278,7 +272,6 @@ namespace HRMS.API.Controllers
                 }
             }
 
-            // Update related entities (Experiences)
             if (employeeDto.Email != null)
             {
                 var user = new ApplicationUser
@@ -290,10 +283,7 @@ namespace HRMS.API.Controllers
 
             if (employeeDto.Experiences != null)
             {
-                // Remove existing experiences
                 _context.Experiences.RemoveRange(employee.Experiences);
-
-                // Add new experiences
                 foreach (var experienceDto in employeeDto.Experiences)
                 {
                     var experience = new Experience
@@ -307,14 +297,9 @@ namespace HRMS.API.Controllers
                     _context.Experiences.Add(experience);
                 }
             }
-
-            // Update related entities (ContactPersons)
             if (employeeDto.ContactPersons != null)
             {
-                // Remove existing contact persons
                 _context.ContactPersons.RemoveRange(employee.ContactPersons);
-
-                // Add new contact persons
                 foreach (var contactPersonDto in employeeDto.ContactPersons)
                 {
                     var contactPerson = new ContactPerson
@@ -331,13 +316,10 @@ namespace HRMS.API.Controllers
                     _context.ContactPersons.Add(contactPerson);
                 }
             }
-            // Update related entities (ChildInformations)
             if (employeeDto.ChildInformations != null)
             {
-                // Remove existing contact persons
                 _context.ChildInformations.RemoveRange(employee.ChildInformations);
 
-                // Add new contact persons
                 foreach (var childDto in employeeDto.ChildInformations)
                 {
                     var childDetail = new ChildInformation
@@ -462,8 +444,6 @@ namespace HRMS.API.Controllers
 
                 _context.Employees.Add(employee);
                 await _context.SaveChangesAsync();
-
-                // Add experience details
                 foreach (var expDto in employeeDto.Experiences)
                 {
                     var experience = new Experience
@@ -477,7 +457,6 @@ namespace HRMS.API.Controllers
                     _context.Experiences.Add(experience);
                 }
 
-                // Add education details
                 foreach (var eduDto in employeeDto.Educations)
                 {
                     var education = new Education
@@ -488,8 +467,6 @@ namespace HRMS.API.Controllers
                     };
                     _context.Educations.Add(education);
                 }
-
-                // Add contact person details
                 foreach (var contactDto in employeeDto.ContactPersons)
                 {
                     var contactPerson = new ContactPerson
@@ -506,7 +483,6 @@ namespace HRMS.API.Controllers
                     _context.ContactPersons.Add(contactPerson);
                 }
 
-                // Add child details
                 foreach (var childDto in employeeDto.ChildInformations)
                 {
                     var childDetail = new ChildInformation

@@ -23,7 +23,6 @@ namespace HRMS.API.Controllers
             return await _context.Positions.ToListAsync();
         }
 
-        // GET: api/Position/5
         [HttpGet("{id}")]
         public async Task<ActionResult<PositionDto>> GetPosition(int id)
         {
@@ -42,7 +41,6 @@ namespace HRMS.API.Controllers
             return Ok(positionDto);
         }
 
-        // POST: api/Position
         [HttpPost]
         public async Task<ActionResult<PositionDto>> CreatePosition(PositionDto positionDto)
         {
@@ -57,7 +55,6 @@ namespace HRMS.API.Controllers
             return CreatedAtAction(nameof(GetPosition), new { id = position.Id }, positionDto);
         }
 
-        // PUT: api/Position/5
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdatePosition(int id, PositionDto positionDto)
         {
@@ -89,7 +86,6 @@ namespace HRMS.API.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Position/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePosition(int id)
         {

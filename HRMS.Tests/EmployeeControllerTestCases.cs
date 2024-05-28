@@ -26,21 +26,16 @@ namespace HRMS.Tests
         [SetUp]
         public void Setup()
         {
-            // Use in-memory database for testing
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                 .Options;
 
             _context = new ApplicationDbContext(options);
 
-            // Seed the in-memory database with test data
             SeedTestData(_context);
-
-            // Setup mock UserManager
             var userStore = new Mock<IUserStore<ApplicationUser>>();
             _mockUserManager = new Mock<UserManager<ApplicationUser>>(userStore.Object, null, null, null, null, null, null, null, null);
 
-            // Setup mock RoleManager
             var roleStore = new Mock<IRoleStore<IdentityRole>>();
             _mockRoleManager = new Mock<RoleManager<IdentityRole>>(roleStore.Object, null, null, null, null);
         }
@@ -89,16 +84,16 @@ namespace HRMS.Tests
                 {
                     Id = 1,
                     Emp_Id = "EMP001",
-                    FirstName = "John",
-                    LastName = "Doe",
-                    Gender = "Male",
-                    MotherName = "Jane Doe",
-                    PhoneNo = "1234567890",
-                    Roles = "Developer",
-                    Email = "john.doe@example.com",
+                    FirstName = "Nazrawit",
+                    LastName = "Gemechu",
+                    Gender = "Female",
+                    MotherName = "Saron",
+                    PhoneNo = "0932534222",
+                    Roles = "Employee",
+                    Email = "nazrawitgemechu@gmail.com",
                     MaritalStatus = "Single",
-                    Region = "Region1",
-                    Woreda = "Woreda1",
+                    Region = "Test Region1",
+                    Woreda = "Test Woreda1",
                     Kebele = 1,
                     HouseNo = "House1",
                     DepartmentId = 1,
@@ -125,16 +120,16 @@ namespace HRMS.Tests
                 {
                     Id = 2,
                     Emp_Id = "EMP002",
-                    FirstName = "Jane",
-                    LastName = "Smith",
-                    Gender = "Female",
-                    MotherName = "Janet Doe",
+                    FirstName = "Binyam",
+                    LastName = "Gemechu",
+                    Gender = "Male",
+                    MotherName = "Saron",
                     PhoneNo = "0987654321",
-                    Roles = "Manager",
-                    Email = "jane.smith@example.com",
-                    MaritalStatus = "Married",
-                    Region = "Region2",
-                    Woreda = "Woreda2",
+                    Roles = "HR Manager",
+                    Email = "binyamgemechu@gmail.com",
+                    MaritalStatus = "Single",
+                    Region = "Test Region2",
+                    Woreda = "Test Woreda2",
                     Kebele = 2,
                     HouseNo = "House2",
                     DepartmentId = 2,
@@ -166,13 +161,10 @@ namespace HRMS.Tests
         [Test]
         public async Task GetEmployees_ReturnsOk_WithExpectedData()
         {
-            // Arrange
             var controller = new EmployeeController(_context, _mockUserManager.Object, _mockRoleManager.Object);
 
-            // Act
             var actionResult = await controller.GetEmployees();
 
-            // Assert
             Assert.IsInstanceOf<OkObjectResult>(actionResult.Result);
 
             var okResult = actionResult.Result as OkObjectResult;
@@ -182,26 +174,24 @@ namespace HRMS.Tests
             Assert.IsNotNull(employees);
             Assert.AreEqual(2, employees.Count());
 
-            // Further assertions can be added to verify the details of each employee
             var employeeList = employees.ToList();
             Assert.AreEqual("EMP001", employeeList[0].Emp_Id);
-            Assert.AreEqual("John", employeeList[0].FirstName);
-            Assert.AreEqual("Doe", employeeList[0].LastName);
+            Assert.AreEqual("Nazrawit", employeeList[0].FirstName);
+            Assert.AreEqual("Gemechu", employeeList[0].LastName);
             Assert.AreEqual("EMP002", employeeList[1].Emp_Id);
-            Assert.AreEqual("Jane", employeeList[1].FirstName);
-            Assert.AreEqual("Smith", employeeList[1].LastName);
+            Assert.AreEqual("Binyam", employeeList[1].FirstName);
+            Assert.AreEqual("Gemechu", employeeList[1].LastName);
         }
         [Test]
         public async Task CorrectRegisterEmployee_ValidData_ReturnsOk()
         {
-            // Arrange
             var controller = new EmployeeController(_context, _mockUserManager.Object, _mockRoleManager.Object);
             var employeeDto = new UpdateEmployeeDto
             {
-                FirstName = "John",
-                LastName = "Doe",
-                MotherName = "Jane Doe",
-                Email = "john.doe@example.com",
+                FirstName = "Sena",
+                LastName = "Adane",
+                MotherName = "Enana",
+                Email = "senaadane@gmail.com",
                 Emp_Id = "EMP003",
                 DepartmentId = 1,
                 GradeId = 1,
@@ -210,13 +200,13 @@ namespace HRMS.Tests
                 DegreeId = 1,
                 HireDate = DateTime.Now,
                 Salary = 50000,
-                Roles = "Developer",
-                Gender = "Male",
+                Roles = "Employee",
+                Gender = "Female",
                 MaritalStatus = "Single",
-                Region = "Region",
-                Woreda = "Woreda",
+                Region = "Test Region",
+                Woreda = "Test Woreda",
                 Kebele = 123,
-                PhoneNo = "1234567890",
+                PhoneNo = "0932434723",
                 Experiences = new List<ExperienceDto>
     {
       new ExperienceDto
@@ -239,67 +229,47 @@ namespace HRMS.Tests
     {
       new ContactPersonDto
       {
-        ContactPersonName = "Jane Smith",
-        Relationship = "Relative",
-        ContactPhoneNo = "9876543210",
+        ContactPersonName = "Enana",
+        Relationship = "Mother",
+        ContactPhoneNo = "0932632322",
         ContactRegion = "Region",
         ContactWoreda = "Woreda",
         ContactKebele = 456,
         ContactHouseNo = "123"
       }
-    },
-                ChildInformations = new List<ChildDto>
-    {
-      new ChildDto
-      {
-        ChildName = "Alice",
-        DateOfBirth = DateTime.Now.AddYears(-5)
-      }
     }
             };
-
-            // Mock UserManager CreateAsync to return success
             _mockUserManager.Setup(um => um.CreateAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
               .Returns(Task.FromResult(IdentityResult.Success));
-
-            // Mock RoleManager RoleExistsAsync to return false (need to create role)
             _mockRoleManager.Setup(rm => rm.RoleExistsAsync(It.IsAny<string>()))
               .Returns(Task.FromResult(false));
-
-            // Mock RoleManager CreateAsync to succeed
             _mockRoleManager.Setup(rm => rm.CreateAsync(It.IsAny<IdentityRole>()))
               .Returns(Task.FromResult(IdentityResult.Success));
-
-            // Mock UserManager AddToRoleAsync to succeed
             _mockUserManager.Setup(um => um.AddToRoleAsync(It.IsAny<ApplicationUser>(), It.IsAny<string>()))
               .Returns(Task.FromResult(IdentityResult.Success));
 
-            // Act
             var actionResult = await controller.CorrectRegisterEmployee(employeeDto);
 
-            // Assert
             var okResult = actionResult as OkObjectResult;
             Assert.IsNotNull(okResult);
             Assert.AreEqual(StatusCodes.Status200OK, okResult.StatusCode);
 
             var response = okResult.Value as EmployeeDto;
             Assert.IsNotNull(response);
-            // Add assertions to verify other properties of the returned EmployeeDto
         }
 
         [Test]
         public async Task CorrectRegisterEmployee_ReturnsBadRequest_ForDuplicateEmpId()
         {
-            // Arrange
             var controller = new EmployeeController(_context, _mockUserManager.Object, _mockRoleManager.Object);
-            var existingEmployee = _context.Employees.First(); // Assuming there's already an employee in the database
+            var existingEmployee = _context.Employees.First(); 
             var employeeDto = new UpdateEmployeeDto
             {
-                Emp_Id = existingEmployee.Emp_Id, // Using existing employee's Emp_Id
-                FirstName = "Bob",
-                LastName = "Johnson",
-                MotherName = "Mary Johnson",
-                Email = "bob.johnson@example.com",
+                Emp_Id = existingEmployee.Emp_Id, 
+                FirstName = "Hilina",
+                LastName = "Teshome",
+                MotherName = "Mother",
+                Email = "hilinateshome@gmail.com",
                 DepartmentId = 1,
                 GradeId = 1,
                 PositionId = 1,
@@ -308,12 +278,12 @@ namespace HRMS.Tests
                 HireDate = DateTime.Now,
                 Salary = 70000,
                 Roles = "Employee",
-                Gender = "Male",
+                Gender = "Female",
                 MaritalStatus = "Single",
-                Woreda = "Sample Woreda",
+                Woreda = "Test Woreda",
                 Kebele = 123,
                 HouseNo = "123",
-                Region = "Sample Region",
+                Region = "Test Region",
                 PhoneNo = "0987654321",
                 Experiences = new List<ExperienceDto>
         {
@@ -337,33 +307,22 @@ namespace HRMS.Tests
         {
             new ContactPersonDto
             {
-                ContactPersonName = "Alice Johnson",
-                Relationship = "Spouse",
-                ContactPhoneNo = "0123456789",
+                ContactPersonName = "Teshome",
+                Relationship = "Father",
+                ContactPhoneNo = "0933527322",
                 ContactWoreda = "Sample Woreda",
                 ContactRegion = "Sample Region",
                 ContactKebele = 123,
                 ContactHouseNo = "123"
             }
-        },
-                ChildInformations = new List<ChildDto>
-        {
-            new ChildDto
-            {
-                ChildName = "Tom Johnson",
-                DateOfBirth = DateTime.Parse("2015-01-01")
-            }
         }
             };
 
-            // Act
             var actionResult = await controller.CorrectRegisterEmployee(employeeDto);
 
-            // Assert
             var badRequestResult = actionResult as BadRequestObjectResult;
             Assert.IsNotNull(badRequestResult);
             Assert.AreEqual(StatusCodes.Status400BadRequest, badRequestResult.StatusCode);
-            // Add more assertions to check the error response, if needed
         }
 
         [TearDown]

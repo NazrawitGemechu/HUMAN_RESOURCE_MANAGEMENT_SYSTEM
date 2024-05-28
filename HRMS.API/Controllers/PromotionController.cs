@@ -41,21 +41,16 @@ namespace HRMS.API.Controllers
         [Route("ApplyForJob/{jobId}")]
         public async Task<IActionResult> ApplyForJob(int jobId, [FromQuery] string userId)
         {
-            // Get the current user's ID from the claims
-            //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             if (string.IsNullOrEmpty(userId))
             {
                 return Unauthorized("User ID not found in claims");
             }
-
-            // Retrieve the employee ID from the user model based on the user ID
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
             {
                 return NotFound("User not found");
             }
-
-            // Use the employee ID from the user model to find the corresponding employee
             var employee = await _context.Employees
                 .Include(e => e.AppliedJobs)
                 .FirstOrDefaultAsync(e => e.Id == user.EmployeeId);
@@ -64,18 +59,13 @@ namespace HRMS.API.Controllers
             {
                 return NotFound("Employee not found");
             }
-
-            // Create a new instance of EmployeeJobApplication
             var employeeJobApplication = new EmployeeJobApplication
             {
                 EmployeeId = employee.Id,
                 InternalJobId = jobId
             };
-
-            // Add the employeeJobApplication to the employee's AppliedJobs collection
             employee.AppliedJobs.Add(employeeJobApplication);
 
-            // Save changes to the database
             await _context.SaveChangesAsync();
 
             var notification = new Notification
@@ -264,7 +254,6 @@ namespace HRMS.API.Controllers
         [HttpPost("PromoteEmployee")]
         public async Task<IActionResult> PromoteEmployee(PromotionDto promotionDTO)
         {
-            // Retrieve the selected shortlisted employee and the corresponding job application
             var jobApplication = await _context.EmployeeJobApplications
                 .Include(app => app.Employee)
                 .Include(app => app.InternalJob)
@@ -276,12 +265,9 @@ namespace HRMS.API.Controllers
                 return NotFound("Employee not found or not shortlisted.");
             }
 
-            // Extract necessary details
             var employeeId = jobApplication.Employee.Id;
             var previousPositionId = jobApplication.Employee.PositionId;
             var newPositionId = jobApplication.InternalJob.PositionId;
-
-            // Create a new Promotion object
             var promotion = new Promotion
             {
                 EmployeeId = employeeId,
@@ -293,11 +279,9 @@ namespace HRMS.API.Controllers
                 NewSalary = promotionDTO.NewSalary
             };
 
-            // Save promotion to the database
             _context.Promotions.Add(promotion);
             await _context.SaveChangesAsync();
 
-            // Update employee information
             var employeeToUpdate = await _context.Employees.FindAsync(employeeId);
             if (employeeToUpdate != null)
             {
@@ -307,7 +291,6 @@ namespace HRMS.API.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // Update job application status
             jobApplication.Status = "Promoted";
             await _context.SaveChangesAsync();
 

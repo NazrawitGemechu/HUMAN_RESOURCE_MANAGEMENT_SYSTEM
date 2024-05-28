@@ -47,15 +47,14 @@ namespace HRMS.Tests
 
             _mockConfiguration = new Mock<IConfiguration>();
 
-            // Seed data
             var employee = new Employee
             {
                 Id = 1,
                 Emp_Id = "EMP001",
-                FirstName = "John",
-                LastName = "Doe",
-                MotherName = "Mother Name",
-                Email = "john.doe@example.com",
+                FirstName = "Nazrawit",
+                LastName = "Gemechu",
+                MotherName = "Saron",
+                Email = "nazrawitgemechu@gmail.com",
                 DepartmentId = 1,
                 GradeId = 1,
                 PositionId = 1,
@@ -64,13 +63,13 @@ namespace HRMS.Tests
                 HireDate = DateTime.Now,
                 Salary = 50000,
                 Roles = "Admin",
-                Gender = "Male",
+                Gender = "Female",
                 MaritalStatus = "Single",
-                Woreda = "Sample Woreda",
+                Woreda = "Test Woreda",
                 Kebele = 123,
                 HouseNo = "123",
-                Region = "Sample Region",
-                PhoneNo = "0123456789"
+                Region = "Test Region",
+                PhoneNo = "0937826382"
             };
 
             var leaveType = new LeaveType
@@ -97,26 +96,12 @@ namespace HRMS.Tests
             _context.LeaveTypes.Add(leaveType);
             _context.Leaves.Add(leave);
             _context.SaveChanges();
-
-            // Initialize the controller
             _controller = new LeaveController(_context, _mockUserManager.Object, _mockRoleManager.Object, _mockConfiguration.Object);
-        }
-
-        private async Task<int> CalculateRemainingLeaveBalance(int employeeId, int leaveTypeId)
-        {
-            // Mock implementation of the remaining leave balance logic
-            return 15;
-        }
-
-        private async Task UpdateLeaveBalance(int employeeId, int leaveTypeId, int remainingBalance)
-        {
-            // Mock implementation of the update leave balance logic
         }
 
         [Test]
         public async Task RequestLeave_ReturnsOk_WhenLeaveRequestIsValid()
         {
-            // Arrange
             var leaveRequestDto = new LeaveRequestDto
             {
                 Emp_Id = "EMP001",
@@ -126,10 +111,7 @@ namespace HRMS.Tests
                 Reason = "Vacation"
             };
 
-            // Act
             var actionResult = await _controller.RequestLeave(leaveRequestDto);
-
-            // Assert
             Assert.IsInstanceOf<OkObjectResult>(actionResult);
             var okResult = actionResult as OkObjectResult;
             Assert.IsNotNull(okResult);
@@ -139,7 +121,6 @@ namespace HRMS.Tests
         [Test]
         public async Task RequestLeave_ReturnsNotFound_WhenEmployeeNotFound()
         {
-            // Arrange
             var leaveRequestDto = new LeaveRequestDto
             {
                 Emp_Id = "EMP999",
@@ -149,10 +130,8 @@ namespace HRMS.Tests
                 Reason = "Vacation"
             };
 
-            // Act
             var actionResult = await _controller.RequestLeave(leaveRequestDto);
 
-            // Assert
             Assert.IsInstanceOf<NotFoundObjectResult>(actionResult);
             var notFoundResult = actionResult as NotFoundObjectResult;
             Assert.IsNotNull(notFoundResult);
@@ -162,13 +141,11 @@ namespace HRMS.Tests
         [Test]
         public async Task ApproveLeave_ReturnsNotFound_WhenLeaveNotFound()
         {
-            // Arrange
-            var leaveId = 999; // Non-existing leaveId
 
-            // Act
+            var leaveId = 999; 
+
             var actionResult = await _controller.ApproveLeave(leaveId);
 
-            // Assert
             Assert.IsInstanceOf<NotFoundObjectResult>(actionResult);
             var notFoundResult = actionResult as NotFoundObjectResult;
             Assert.IsNotNull(notFoundResult);
@@ -178,13 +155,10 @@ namespace HRMS.Tests
         [Test]
         public async Task RejectLeave_ReturnsOk_WhenLeaveIsRejected()
         {
-            // Arrange
             var leaveId = 1;
 
-            // Act
             var actionResult = await _controller.RejectLeave(leaveId);
 
-            // Assert
             Assert.IsInstanceOf<OkObjectResult>(actionResult);
             var okResult = actionResult as OkObjectResult;
             Assert.IsNotNull(okResult);
@@ -202,13 +176,10 @@ namespace HRMS.Tests
         [Test]
         public async Task RejectLeave_ReturnsNotFound_WhenLeaveNotFound()
         {
-            // Arrange
-            var leaveId = 999; // Non-existing leaveId
+            var leaveId = 999; 
 
-            // Act
             var actionResult = await _controller.RejectLeave(leaveId);
 
-            // Assert
             Assert.IsInstanceOf<NotFoundObjectResult>(actionResult);
             var notFoundResult = actionResult as NotFoundObjectResult;
             Assert.IsNotNull(notFoundResult);

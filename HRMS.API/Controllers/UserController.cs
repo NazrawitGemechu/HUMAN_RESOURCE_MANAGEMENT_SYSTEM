@@ -61,22 +61,15 @@ namespace HRMS.API.Controllers
             }
             if (objFromDb.LockoutEnd != null && objFromDb.LockoutEnd > DateTime.Now)
             {
-                //user is locked and will remain locked out untill lockout item
-                //clicking on this action will unlock them
                 objFromDb.LockoutEnd = DateTime.Now;
 
             }
             else
             {
-                //user is not locked, and we want to lock the user
                 objFromDb.LockoutEnd = DateTime.Now.AddYears(100);
-
-
             }
             _context.SaveChanges();
             return Ok();
-
-
         }
 
         [HttpPost]

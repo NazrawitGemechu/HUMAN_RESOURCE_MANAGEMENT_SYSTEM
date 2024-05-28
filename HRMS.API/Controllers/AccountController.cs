@@ -49,7 +49,6 @@ namespace HRMS.API.Controllers
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-            // Create a list to hold all the claims
             var claimsList = new List<Claim>
     {
         new Claim(ClaimTypes.NameIdentifier, user.Id),
@@ -57,10 +56,8 @@ namespace HRMS.API.Controllers
         new Claim(ClaimTypes.Email, user.Email)
     };
 
-            // Retrieve roles associated with the user
             var roles = _userManager.GetRolesAsync(user).Result;
 
-            // Add role claims if the user has roles
             if (roles != null && roles.Any())
             {
                 foreach (var role in roles)
@@ -97,7 +94,6 @@ namespace HRMS.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
-            // Check if the user is authenticated
             if (User.Identity.IsAuthenticated)
             {
                 await _signInManager.SignOutAsync();
@@ -182,7 +178,6 @@ namespace HRMS.API.Controllers
                     return NotFound("User not found");
                 }
 
-                // Update photo only if provided
                 if (model.PhotoData != null)
                 {
                     var fileName = Path.GetFileName(model.PhotoData.FileName);
@@ -192,8 +187,6 @@ namespace HRMS.API.Controllers
                     }
 
                     var filePath = Path.Combine(Directory.GetCurrentDirectory(), "Images", fileName);
-
-                    // Delete existing photo if present
                     if (!string.IsNullOrEmpty(user.pictureURL))
                     {
                         var existingPhotoPath = Path.Combine(Directory.GetCurrentDirectory(), "Images", user.pictureURL.Split('/').Last());

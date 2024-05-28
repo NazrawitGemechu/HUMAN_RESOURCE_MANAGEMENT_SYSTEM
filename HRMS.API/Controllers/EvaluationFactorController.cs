@@ -17,14 +17,12 @@ public class EvaluationFactorController : ControllerBase
         _context = context;
     }
 
-    // GET: api/EvaluationFactors
     [HttpGet]
     public async Task<ActionResult<IEnumerable<EvaluationFactor>>> GetEvaluationFactors()
     {
         return await _context.EvaluationFactors.ToListAsync();
     }
 
-    // GET: api/EvaluationFactors/5
     [HttpGet("{id}")]
     public async Task<ActionResult<EvaluationFactor>> GetEvaluationFactor(int id)
     {
@@ -38,7 +36,6 @@ public class EvaluationFactorController : ControllerBase
         return evaluationFactor;
     }
 
-    // PUT: api/EvaluationFactors/5
     [HttpPut("{id}")]
     public async Task<IActionResult> PutEvaluationFactor(int id, EvaluationFactor evaluationFactor)
     {
@@ -68,7 +65,6 @@ public class EvaluationFactorController : ControllerBase
         return NoContent();
     }
 
-    // POST: api/EvaluationFactors
     [HttpPost]
     public async Task<ActionResult<EvaluationFactor>> PostEvaluationFactor(EvaluationFactor evaluationFactor)
     {
@@ -78,7 +74,6 @@ public class EvaluationFactorController : ControllerBase
         return CreatedAtAction(nameof(GetEvaluationFactor), new { id = evaluationFactor.Id }, evaluationFactor);
     }
 
-    // DELETE: api/EvaluationFactors/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteEvaluationFactor(int id)
     {

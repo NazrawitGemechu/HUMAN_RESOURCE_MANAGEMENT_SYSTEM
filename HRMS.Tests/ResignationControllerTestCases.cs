@@ -23,40 +23,37 @@ namespace HRMS.Tests
         [SetUp]
         public void Setup()
         {
-            // Mocking DbContext
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                 .Options;
             _context = new ApplicationDbContext(options);
 
-            // Mocking UserManager
             var mockUserStore = new Mock<IUserStore<ApplicationUser>>();
-            
-            // Seed data
+
             _context.Employees.Add(new Employee
             {
                 Emp_Id = "EMP001",
-                FirstName = "John",
-                LastName = "Doe",
-                Gender = "Male",
-                Email = "john.doe@example.com",
-                PhoneNo = "1234567890",
-                MotherName = "Jane Doe",
+                FirstName = "Nazrawit",
+                LastName = "Gemechu",
+                Gender = "Female",
+                Email = "nazrawitgemechu@gmail.com",
+                PhoneNo = "0923465322",
+                MotherName = "Saron",
                 MaritalStatus = "Single",
-                Region = "Region1",
-                Woreda = "Woreda1",
+                Region = "Test Region",
+                Woreda = "Test Woreda",
                 Roles = "Employee",
                 Id = 1 
             });
 
-            _context.Departments.Add(new Department { Id = 1, Name = "IT" });
-            _context.Positions.Add(new Position { Id = 1, Name = "Manager" });
+            _context.Departments.Add(new Department { Id = 1, Name = "Test Department" });
+            _context.Positions.Add(new Position { Id = 1, Name = "Test Position" });
             _context.SaveChanges();
             var resignation = new Resignation
             {
                 Id = 1,
                 EmployeeId = 1,
-                FullName = "John Doe",
+                FullName = "Nazrawit Gemechu",
                 SeparationDate = DateTime.Now.AddDays(30),
                 Reason = "Personal reasons",
                 Satisfaction = "Neutral",
@@ -78,10 +75,8 @@ namespace HRMS.Tests
         public async Task GetResignationRequests_ReturnsOk()
         {
             var _controller = new ResignationController(_context);
-            // Act
             var result = await _controller.GetResignationRequests() as OkObjectResult;
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
             Assert.IsNotNull(result.Value);
@@ -91,10 +86,8 @@ namespace HRMS.Tests
         public async Task ApproveResignation_ReturnsOk_ApprovedSuccessfully()
         {
             var _controller = new ResignationController(_context);
-            // Act
             var result = await _controller.ApproveResignation(1) as OkObjectResult;
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
             Assert.AreEqual("Resignation request approved successfully", result.Value);
@@ -104,10 +97,8 @@ namespace HRMS.Tests
         public async Task RejectResignation_ReturnsOk_WhenRejectedSuccessfully()
         {
             var _controller = new ResignationController(_context);
-            // Act
             var result = await _controller.RejectResignation(1) as OkObjectResult;
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(200, result.StatusCode);
             Assert.AreEqual("Resignation request rejected successfully", result.Value);

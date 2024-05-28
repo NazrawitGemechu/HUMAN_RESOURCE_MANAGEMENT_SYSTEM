@@ -86,8 +86,6 @@ namespace HRMS.API.Controllers
             }
         }
 
-
-        // GET: api/EmployeeEvaluations/5
         [HttpGet]
         [Route("{employeeId}")]
         public async Task<ActionResult<EmployeeEvaluationDto>> GetEmployeeEvaluations(int employeeId)
@@ -138,8 +136,6 @@ namespace HRMS.API.Controllers
             return Ok();
         }
 
-
-        // POST: api/EmployeeFeedback
         [HttpPost("PostEmployeeFeedback")]
         public async Task<ActionResult<EmployeeFeedback>> PostEmployeeFeedback([FromBody] FeedbackDto feedbackDto)
         {
@@ -166,10 +162,6 @@ namespace HRMS.API.Controllers
 
             return CreatedAtAction("GetEmployeeFeedback", new { id = feedback.Id }, feedback);
         }
-
-
-
-        // GET: api/EmployeeEvaluations/Employee/{employeeId}
         [HttpGet("Employees")]
         public async Task<ActionResult<EmployeeOwnEvaluationDetailDto>> GetEmployeeEvaluationDetails([FromQuery] string userId)
         {

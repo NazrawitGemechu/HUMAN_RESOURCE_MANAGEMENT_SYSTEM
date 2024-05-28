@@ -44,7 +44,7 @@ namespace HRMS.Tests
                                 .UseInMemoryDatabase(databaseName: "TestDatabase")
                                 .Options;
             _dbContext = new ApplicationDbContext(_dbContextOptions);
-            _dbContext.Users.Add(new ApplicationUser { Id = "1", Name = "testuser", Email = "testuser@example.com" });
+            _dbContext.Users.Add(new ApplicationUser { Id = "1", Name = "testuser", Email = "testuser@gmail.com" });
             _dbContext.SaveChanges();
             var jwtSettings = new Dictionary<string, string>
             {
@@ -63,17 +63,14 @@ namespace HRMS.Tests
         [Test]
         public async Task Login_InvalidCredentials_ReturnsNotFound()
         {
-            // Arrange
             var userLoginDto = new UserLoginDto { username = "testuser", password = "wrongpassword" };
-            var user = new ApplicationUser { Id = "1", UserName = "testuser", Email = "testuser@example.com", Name = "Test User" };
+            var user = new ApplicationUser { Id = "1", UserName = "testuser", Email = "testuser@gmail.com", Name = "Test User" };
 
             _mockUserManager.Setup(x => x.FindByNameAsync(userLoginDto.username)).ReturnsAsync(user);
             _mockSignInManager.Setup(x => x.PasswordSignInAsync(user, userLoginDto.password, false, false)).ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Failed);
 
-            // Act
             var result = await _controller.Login(userLoginDto) as NotFoundObjectResult;
 
-            // Assert
             Assert.IsNotNull(result);
             Assert.IsInstanceOf<NotFoundObjectResult>(result);
             Assert.AreEqual("Invalid username or password", result.Value);

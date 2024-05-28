@@ -33,15 +33,14 @@ namespace HRMS.Tests
             var store = new Mock<IUserStore<ApplicationUser>>();
             _mockUserManager = new Mock<UserManager<ApplicationUser>>(store.Object, null, null, null, null, null, null, null, null);
 
-            // Seed data
             var employee = new Employee
             {
                 Id = 1,
                 Emp_Id = "EMP001",
-                FirstName = "John",
-                LastName = "Doe",
-                MotherName = "Mother Name",
-                Email = "john.doe@example.com",
+                FirstName = "Nazrawit",
+                LastName = "Gemechu",
+                MotherName = "Saron",
+                Email = "nazrawitgemechu@gmail.com",
                 DepartmentId = 1,
                 GradeId = 1,
                 PositionId = 1,
@@ -50,20 +49,20 @@ namespace HRMS.Tests
                 HireDate = DateTime.Now,
                 Salary = 50000,
                 Roles = "Admin",
-                Gender = "Male",
+                Gender = "Female",
                 MaritalStatus = "Single",
-                Woreda = "Sample Woreda",
+                Woreda = "Test Woreda",
                 Kebele = 123,
                 HouseNo = "123",
-                Region = "Sample Region",
-                PhoneNo = "0123456789"
+                Region = "Test Region",
+                PhoneNo = "0935253622"
             };
 
             var user = new ApplicationUser
             {
                 Id = "user1",
-                Name = "john.doe@example.com",
-                Email = "john.doe@example.com",
+                Name = "Nazrawit",
+                Email = "nazrawitgemechu@gmail.com",
                 EmployeeId = 1
             };
 
@@ -77,7 +76,6 @@ namespace HRMS.Tests
         [Test]
         public async Task PostJob_ReturnsOk_WhenJobIsPostedSuccessfully()
         {
-            // Arrange
             var jobDto = new InternalJobDto
             {
                 JobTitle = "Software Engineer",
@@ -86,10 +84,8 @@ namespace HRMS.Tests
                 Requirements = "5 years experience"
             };
 
-            // Act
             var actionResult = await _controller.PostJob(jobDto);
 
-            // Assert
             Assert.IsInstanceOf<OkObjectResult>(actionResult);
             var okResult = actionResult as OkObjectResult;
             Assert.IsNotNull(okResult);
@@ -99,7 +95,6 @@ namespace HRMS.Tests
         [Test]
         public async Task ApplyForJob_ReturnsOk_WhenJobApplicationIsSuccessful()
         {
-            // Arrange
             var job = new InternalJob
             {
                 JobTitle = "Software Engineer",
@@ -110,10 +105,8 @@ namespace HRMS.Tests
             _context.InternalJobs.Add(job);
             await _context.SaveChangesAsync();
 
-            // Act
             var actionResult = await _controller.ApplyForJob(job.Id, "user1");
 
-            // Assert
             Assert.IsInstanceOf<OkObjectResult>(actionResult);
             var okResult = actionResult as OkObjectResult;
             Assert.IsNotNull(okResult);
@@ -128,7 +121,6 @@ namespace HRMS.Tests
         [Test]
         public async Task ApplyForJob_ReturnsUnauthorized_WhenUserIdIsMissing()
         {
-            // Arrange
             var job = new InternalJob
             {
                 JobTitle = "Software Engineer",
@@ -139,10 +131,8 @@ namespace HRMS.Tests
             _context.InternalJobs.Add(job);
             await _context.SaveChangesAsync();
 
-            // Act
             var actionResult = await _controller.ApplyForJob(job.Id, null);
 
-            // Assert
             Assert.IsInstanceOf<UnauthorizedObjectResult>(actionResult);
             var unauthorizedResult = actionResult as UnauthorizedObjectResult;
             Assert.IsNotNull(unauthorizedResult);
@@ -152,7 +142,6 @@ namespace HRMS.Tests
         [Test]
         public async Task ApplyForJob_ReturnsNotFound_WhenUserNotFound()
         {
-            // Arrange
             var job = new InternalJob
             {
                 JobTitle = "Software Engineer",
@@ -163,10 +152,8 @@ namespace HRMS.Tests
             _context.InternalJobs.Add(job);
             await _context.SaveChangesAsync();
 
-            // Act
             var actionResult = await _controller.ApplyForJob(job.Id, "nonexistentUser");
 
-            // Assert
             Assert.IsInstanceOf<NotFoundObjectResult>(actionResult);
             var notFoundResult = actionResult as NotFoundObjectResult;
             Assert.IsNotNull(notFoundResult);
@@ -176,7 +163,6 @@ namespace HRMS.Tests
         [Test]
         public async Task ApplyForJob_ReturnsNotFound_WhenEmployeeNotFound()
         {
-            // Arrange
             var job = new InternalJob
             {
                 JobTitle = "Software Engineer",
@@ -190,17 +176,15 @@ namespace HRMS.Tests
             var user = new ApplicationUser
             {
                 Id = "user2",
-                Name = "nonexistent.employee@example.com",
-                Email = "nonexistent.employee@example.com",
-                EmployeeId = 999 // Non-existent employee ID
+                Name = "nonexistent user",
+                Email = "nonexistent@gmail.com",
+                EmployeeId = 999 
             };
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // Act
             var actionResult = await _controller.ApplyForJob(job.Id, "user2");
 
-            // Assert
             Assert.IsInstanceOf<NotFoundObjectResult>(actionResult);
             var notFoundResult = actionResult as NotFoundObjectResult;
             Assert.IsNotNull(notFoundResult);

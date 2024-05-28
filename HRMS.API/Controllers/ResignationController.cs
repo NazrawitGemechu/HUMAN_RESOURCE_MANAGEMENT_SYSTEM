@@ -59,15 +59,11 @@ namespace HRMS.API.Controllers
         [Route("RequestResignation")]
         public async Task<IActionResult> RequestLeave(ResignationDto resignationDto)
         {
-
-            // Retrieve the employee from the database based on the provided Emp_Id
             var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Emp_Id == resignationDto.Emp_Id);
             if (employee == null)
             {
                 return NotFound("Employee not found");
             }
-
-            // Retrieve the department from the database based on the employee's departmentId
             var department = await _context.Departments.FirstOrDefaultAsync(d => d.Id == employee.DepartmentId);
             if (department == null)
             {
@@ -78,8 +74,6 @@ namespace HRMS.API.Controllers
             {
                 return NotFound("Position not found");
             }
-
-            // Create a new Resignation object from the DTO
             var resignation = new Resignation
             {
 
@@ -97,8 +91,6 @@ namespace HRMS.API.Controllers
                 Status = "Pending",
 
             };
-
-            // Add the leave to the database
             _context.Resignations.Add(resignation);
             await _context.SaveChangesAsync();
 

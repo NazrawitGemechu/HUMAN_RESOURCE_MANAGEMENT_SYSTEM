@@ -33,13 +33,10 @@ namespace HRMS.Tests
         [Test]
         public async Task GetEmployeeEvaluations_ShouldReturnOkWithEmployeeEvaluations()
         {
-            // Arrange
             var controller = new EvaluationController(_context, _userManagerMock.Object);
 
-            // Act
             var result = await controller.GetEmployeeEvaluations();
 
-            // Assert
             Assert.That(result.Result, Is.TypeOf<OkObjectResult>());
             var okResult = result.Result as OkObjectResult;
             Assert.That(okResult.StatusCode, Is.EqualTo(StatusCodes.Status200OK));
@@ -49,14 +46,11 @@ namespace HRMS.Tests
         [Test]
         public async Task GetEmployeeEvaluations_ShouldReturnInternalServerErrorOnException()
         {
-            // Arrange
-            _context.Dispose(); // Dispose the context to simulate an exception
-            var controller = new EvaluationController(_context, _userManagerMock.Object);
 
-            // Act
+            _context.Dispose(); 
+            var controller = new EvaluationController(_context, _userManagerMock.Object);
             var result = await controller.GetEmployeeEvaluations();
 
-            // Assert
             Assert.That(result.Result, Is.TypeOf<ObjectResult>());
             var objectResult = result.Result as ObjectResult;
             Assert.That(objectResult.StatusCode, Is.EqualTo(StatusCodes.Status500InternalServerError));
@@ -66,14 +60,10 @@ namespace HRMS.Tests
         [Test]
         public async Task GetEvaluationDetail_ReturnNotFound_WhenEmployeeNotFound()
         {
-            // Arrange
             var employeeId = 1;
             var controller = new EvaluationController(_context, _userManagerMock.Object);
-
-            // Act
             var result = await controller.GetEmployeeEvaluationDetail(employeeId);
 
-            // Assert
             Assert.That(result.Result, Is.TypeOf<NotFoundObjectResult>());
             var notFoundResult = result.Result as NotFoundObjectResult;
             Assert.That(notFoundResult.StatusCode, Is.EqualTo(StatusCodes.Status404NotFound));

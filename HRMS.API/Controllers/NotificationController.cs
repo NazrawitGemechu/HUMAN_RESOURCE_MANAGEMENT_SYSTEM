@@ -29,7 +29,6 @@ namespace HRMS.API.Controllers
             var user = await _userManager.FindByIdAsync(userId);
             var employeeId = user.EmployeeId;
 
-            // Retrieve notifications for the employee ID
             return await _context.Notifications
                 .Where(n => n.EmployeeId == employeeId)
                 .OrderByDescending(n => n.Timestamp)
